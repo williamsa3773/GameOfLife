@@ -1,0 +1,11 @@
+C:\Users\willi\source\repos\GameOfLife\GOLProject\GOLProject\bin\Debug\GOLProject.exe.config
+C:\Users\willi\source\repos\GameOfLife\GOLProject\GOLProject\bin\Debug\GOLProject.exe
+C:\Users\willi\source\repos\GameOfLife\GOLProject\GOLProject\bin\Debug\GOLProject.pdb
+C:\Users\willi\source\repos\GameOfLife\GOLProject\GOLProject\obj\Debug\GOLProject.csproj.AssemblyReference.cache
+C:\Users\willi\source\repos\GameOfLife\GOLProject\GOLProject\obj\Debug\GOLProject.csproj.SuggestedBindingRedirects.cache
+C:\Users\willi\source\repos\GameOfLife\GOLProject\GOLProject\obj\Debug\GOLProject.Form1.resources
+C:\Users\willi\source\repos\GameOfLife\GOLProject\GOLProject\obj\Debug\GOLProject.Properties.Resources.resources
+C:\Users\willi\source\repos\GameOfLife\GOLProject\GOLProject\obj\Debug\GOLProject.csproj.GenerateResource.cache
+C:\Users\willi\source\repos\GameOfLife\GOLProject\GOLProject\obj\Debug\GOLProject.csproj.CoreCompileInputs.cache
+C:\Users\willi\source\repos\GameOfLife\GOLProject\GOLProject\obj\Debug\GOLProject.exe
+C:\Users\willi\source\repos\GameOfLife\GOLProject\GOLProject\obj\Debug\GOLProject.pdb
