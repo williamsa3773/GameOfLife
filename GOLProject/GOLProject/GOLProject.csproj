@@ -58,6 +58,24 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SettingsDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="SettingsDialog.Designer.cs">
+      <DependentUpon>SettingsDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="SizeDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="SizeDialog.Designer.cs">
+      <DependentUpon>SizeDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="SpeedDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="SpeedDialog.Designer.cs">
+      <DependentUpon>SpeedDialog.cs</DependentUpon>
+    </Compile>
     <EmbeddedResource Include="Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>
     </EmbeddedResource>
@@ -71,6 +89,15 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
+    <EmbeddedResource Include="SettingsDialog.resx">
+      <DependentUpon>SettingsDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SizeDialog.resx">
+      <DependentUpon>SizeDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SpeedDialog.resx">
+      <DependentUpon>SpeedDialog.cs</DependentUpon>
+    </EmbeddedResource>
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>

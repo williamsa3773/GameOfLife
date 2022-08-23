@@ -9,3 +9,6 @@ C:\Users\willi\source\repos\GameOfLife\GOLProject\GOLProject\obj\Debug\GOLProjec
 C:\Users\willi\source\repos\GameOfLife\GOLProject\GOLProject\obj\Debug\GOLProject.csproj.CoreCompileInputs.cache
 C:\Users\willi\source\repos\GameOfLife\GOLProject\GOLProject\obj\Debug\GOLProject.exe
 C:\Users\willi\source\repos\GameOfLife\GOLProject\GOLProject\obj\Debug\GOLProject.pdb
+C:\Users\willi\source\repos\GameOfLife\GOLProject\GOLProject\obj\Debug\GOLProject.SizeDialog.resources
+C:\Users\willi\source\repos\GameOfLife\GOLProject\GOLProject\obj\Debug\GOLProject.SpeedDialog.resources
+C:\Users\willi\source\repos\GameOfLife\GOLProject\GOLProject\obj\Debug\GOLProject.SettingsDialog.resources

@@ -13,29 +13,52 @@ namespace GOLProject
     public partial class Form1 : Form
     {
         // The universe array
-        bool[,] universe = new bool[100, 100];
+        public static int width = Properties.Settings.Default.Width;
+        public static int length = Properties.Settings.Default.Length;
+        public static bool[,] universe = new bool[length, width];
         Universe verse;
         Cell cell;
+        Random rand = new Random();
+        //to toggle games run state on/off
         bool IsPaused = false;
 
+        //below are the settings bools
+        //to toggle grid on/off based on user settings
+        bool IsGridOn = Properties.Settings.Default.Grid;
+        //To toggle shown neighbors on/off based on user settings
+        bool IsShowOn = Properties.Settings.Default.Show;
+        //To toggle hud on/off based on user settings
+        bool hud = Properties.Settings.Default.HUD;
+        //To toggle boundary on/off
+        bool boundary = Properties.Settings.Default.Boundary;
+        //To set speed based on user settings
+        int speed = Properties.Settings.Default.Speed;
+        //To set cell alive status based on user settings
+        int initial = Properties.Settings.Default.InitialAlive;
+
         // Drawing colors
-        Color gridColor = Color.Black;
-        Color cellColor = Color.Gray;
+        Color gridColor;
+        Color cellColor;
 
         // The Timer class
         Timer timer = new Timer();
 
         // Generation count
         int generations = 0;
+        int alive = 0;
 
         public Form1()
         {
             InitializeComponent();
+            graphicsPanel1.BackColor = Properties.Settings.Default.BackGroundColor;
+            cellColor = Properties.Settings.Default.CellColor;
+            gridColor = Properties.Settings.Default.GridColor;
             CreateGame();
             // Setup the timer
-            timer.Interval = 1; // milliseconds
+            timer.Interval = speed; // milliseconds
             timer.Tick += Timer_Tick;
-            timer.Enabled = false; // start timer running
+            IsPaused = false;
+            timer.Enabled = false; // start timer running, game begins paused            
         }
 
         // Calculate the next generation of cells
@@ -45,8 +68,10 @@ namespace GOLProject
             Game();
             // Increment generation count
             generations++;
+            alive = Universe.Cell.Count(i => i.isAlive);
             // Update status strip generations
             toolStripStatusLabelGenerations.Text = "Generations = " + generations.ToString();
+            toolStripStatusLabelAlive.Text = "Generation = " + alive.ToString();
         }
 
         // The event called by the timer every Interval milliseconds.
@@ -59,9 +84,9 @@ namespace GOLProject
         {
             // Calculate the width and height of each cell in pixels
             // CELL WIDTH = WINDOW WIDTH / NUMBER OF CELLS IN X
-            int cellWidth = graphicsPanel1.ClientSize.Width / universe.GetLength(0);
+            float cellWidth = graphicsPanel1.ClientSize.Width / universe.GetLength(0);
             // CELL HEIGHT = WINDOW HEIGHT / NUMBER OF CELLS IN Y
-            int cellHeight = graphicsPanel1.ClientSize.Height / universe.GetLength(1);
+            float cellHeight = graphicsPanel1.ClientSize.Height / universe.GetLength(1);
 
             // A Pen for drawing the grid lines (color, width)
             Pen gridPen = new Pen(gridColor, 1);
@@ -77,10 +102,10 @@ namespace GOLProject
                 {
                     // A rectangle to represent each cell in pixels
                     Rectangle cellRect = Rectangle.Empty;
-                    cellRect.X = x * cellWidth;
-                    cellRect.Y = y * cellHeight;
-                    cellRect.Width = cellWidth;
-                    cellRect.Height = cellHeight;
+                    cellRect.X = x * (int)cellWidth;
+                    cellRect.Y = y * (int)cellHeight;
+                    cellRect.Width = (int)cellWidth;
+                    cellRect.Height = (int)cellHeight;
 
                     
                     // Fill the cell with a brush if alive
@@ -89,11 +114,12 @@ namespace GOLProject
                         e.Graphics.FillRectangle(cellBrush, cellRect);
                     }
 
+                    
                     // Outline the cell with a pen
                     e.Graphics.DrawRectangle(gridPen, cellRect.X, cellRect.Y, cellRect.Width, cellRect.Height);
                 }
             }
-
+            
             // Cleaning up pens and brushes
             gridPen.Dispose();
             cellBrush.Dispose();
@@ -116,17 +142,26 @@ namespace GOLProject
 
                 // Toggle the cell's state
                 universe[x, y] = !universe[x, y];
-                cell.X = x;
-                cell.Y = y;
-                cell.isAlive = true;
+                //editing state so that it matches what it going on
+                if(universe[x, y] == true)
+                {
+                    cell.X = x;
+                    cell.Y = y;
+                    cell.isAlive = true;
+                }
+                else if(universe[x, y] == false)
+                {
+                    cell.X = x;
+                    cell.Y = y;
+                    cell.isAlive = false;
+                }
 
                 // Tell Windows you need to repaint
                 graphicsPanel1.Invalidate();
             }
         }
 
-        Random rand = new Random();
-
+        //Instance the main variables use and randomize the board
         public void CreateGame()
         {
             verse = new Universe(universe.GetLength(0), universe.GetLength(1));
@@ -139,7 +174,8 @@ namespace GOLProject
                 {
                     cell = new Cell(x,y);
                     int life = rand.Next(100);
-                    if (life < 20)
+                    //default is 15% but user has complete control over this feature
+                    if (life < initial)
                     {
                         cell.isAlive = true; 
                         universe[x, y] = true;
@@ -154,31 +190,38 @@ namespace GOLProject
             }
         }
 
+        //check the amount of neighbors each cell has
         private void CheckNeighbor()
         {
             foreach(Cell cell in Universe.Cell)
             {
+                //initial coordinates created by each cell
                 int xcord = cell.X;
                 int ycord = cell.Y;
 
+                //since im only check the surrounding cells the difference from the original cell is 1
                 for (int xOff = -1; xOff <= 1; xOff++)
                 {
                     for (int yOff = -1; yOff <= 1; yOff++)
                     {
                         int xCheck = xcord + xOff;
                         int yCheck = ycord + yOff;
+                        //if both offsets equal  0
                         if (xOff == 0 && yOff == 0)
                         {
                             continue;
                         }
+                        //if xychecks are less the 0 then they do not exist on the board
                         else if (xCheck < 0 || yCheck < 0)
                         {
                             continue;
                         }
-                        else if (xCheck > universe.GetLength(1) - 1 || yCheck > universe.GetLength(0) - 1)
+                        //if xychecks are greater then the length of the board they dont exist
+                        else if (xCheck > universe.GetLength(0) - 1 || yCheck > universe.GetLength(1) - 1)
                         {
                             continue;
                         }
+                        //if universe is true then the cell is alive, increment numbers if true
                         if (universe[xCheck, yCheck] == true)
                         {
                             cell.Neighbors++;
@@ -189,21 +232,28 @@ namespace GOLProject
             
         }
 
+        //the rules for the game
         private void Game()
         {
             foreach (Cell cell in Universe.Cell)
             {
+                //this part is for alive cells
                 if(cell.isAlive == true)
                 {
+                    //if less then 2 or great than 3
                     if(cell.Neighbors <2 || cell.Neighbors >3)
                     {
                         cell.NextGenAlive = false;
-                    } else
+                    } 
+                    else
                     {
                         cell.NextGenAlive = true;
                     }
-                } else if (cell.isAlive == false)
+                }
+                //for cells that are dead
+                else if (cell.isAlive == false)
                 {
+                    //if neighbors is equal to 3 then next gen is alive
                     if (cell.Neighbors == 3)
                     {
                         cell.NextGenAlive = true;
@@ -211,14 +261,17 @@ namespace GOLProject
                 }
             }
             
+            //function for deteremining the next board
             foreach(Cell cell in Universe.Cell)
             {
+                //if next equal true then isalive gets overrided and universe = true
                 if(cell.NextGenAlive == true)
                 {
                     cell.isAlive = cell.NextGenAlive;
                     universe[cell.X, cell.Y] = true;
                     cell.Neighbors = 0;
                 }
+                //if false then cells stay dead or become dead
                 else if(cell.NextGenAlive == false)
                 {
                     cell.isAlive = cell.NextGenAlive;
@@ -226,10 +279,12 @@ namespace GOLProject
                     cell.Neighbors = 0;
                 }
             }
+            //needed to update the board allowing to show progression.
             graphicsPanel1.Invalidate();
         }
 
-        private void IsPaused_Click(object sender, EventArgs e)
+        //pause/play
+        private void UpdatePaused_Click(object sender, EventArgs e)
         {
             if(IsPaused == false)
             {
@@ -243,6 +298,7 @@ namespace GOLProject
             }
         }
 
+        //re randomize list and update the board
         private void ResetGame_Click(object sender, EventArgs e)
         {
             timer.Enabled = false;
@@ -252,6 +308,7 @@ namespace GOLProject
             graphicsPanel1.Invalidate();
         }
 
+        //clears list and updates the board
         private void ClearBoard_Click(object sender, EventArgs e)
         {
             timer.Enabled = false;
@@ -279,9 +336,96 @@ namespace GOLProject
             graphicsPanel1.Invalidate();
         }
 
+        //stops the timer and advances generation by 1
         private void NextGen_Click(object sender, EventArgs e)
         {
+            timer.Enabled = false;
             NextGeneration();
+        }
+
+        private void UpdateBackgroundColor_Click(object sender, EventArgs e)
+        {
+            ColorDialog dlg = new ColorDialog();
+            dlg.Color = graphicsPanel1.BackColor;
+
+            if(DialogResult.OK == dlg.ShowDialog())
+            {
+                graphicsPanel1.BackColor = dlg.Color;
+                if(IsGridOn == true)
+                {
+                    gridColor = graphicsPanel1.BackColor;
+                }
+            }
+        }
+
+        private void UpdateGrid_Click(object sender, EventArgs e)
+        {
+            IsGridOn = false;
+            ColorDialog dlg = new ColorDialog();
+            dlg.Color = gridColor;
+
+            if(DialogResult.OK == dlg.ShowDialog())
+            {
+                gridColor = dlg.Color;
+            }
+            graphicsPanel1.Invalidate();
+        }
+
+        private void UpdateCellColor_Click(object sender, EventArgs e)
+        {
+            ColorDialog dlg = new ColorDialog();
+            dlg.Color = cellColor;
+
+            if(DialogResult.OK == dlg.ShowDialog())
+            {
+                cellColor = dlg.Color;
+            }
+            graphicsPanel1.Invalidate();
+        }
+
+
+        private void UpdateGridColor_Click(object sender, EventArgs e)
+        {
+            IsGridOn = !IsGridOn;
+            if(IsGridOn == true)
+            {
+                gridColor = graphicsPanel1.BackColor;
+            }
+            else
+            {
+                gridColor = cellColor;
+            }
+            graphicsPanel1.Invalidate();
+        }
+
+        private void UpdateSpeed_Click(object sender, EventArgs e)
+        {
+            SpeedDialog dlg = new SpeedDialog();
+
+            dlg.Number = speed;
+            if(DialogResult.OK == dlg.ShowDialog())
+            {
+                
+                speed = dlg.Number;
+                timer.Interval = speed;
+                graphicsPanel1.Invalidate();
+            }
+        }
+
+        private void exitToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            this.Close();
+        }
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+
+        }
+
+        private void UpdateNeighbor_Click(object sender, EventArgs e)
+        {
+            IsShowOn = !IsShowOn;
+            graphicsPanel1.Invalidate();
         }
     }
 
