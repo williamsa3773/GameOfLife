@@ -12,7 +12,7 @@
       <Value Profile="(Default)">50</Value>
     </Setting>
     <Setting Name="Speed" Type="System.Int32" Scope="User">
-      <Value Profile="(Default)">1000</Value>
+      <Value Profile="(Default)">100</Value>
     </Setting>
     <Setting Name="HUD" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>

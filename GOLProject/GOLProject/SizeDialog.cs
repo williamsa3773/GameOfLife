@@ -16,5 +16,17 @@ namespace GOLProject
         {
             InitializeComponent();
         }
+
+        public int X
+        {
+            get { return (int)numericUpDownLength.Value; }
+            set { numericUpDownLength.Value = value; }
+        }
+
+        public int Y
+        {
+            get { return (int)numericUpDownWidth.Value; }
+            set { numericUpDownWidth.Value = value; }
+        }
     }
 }

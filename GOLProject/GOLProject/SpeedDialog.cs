@@ -22,6 +22,5 @@ namespace GOLProject
             get { return (int)numericUpDownNumber.Value; }
             set { numericUpDownNumber.Value = value; }
         }
-
     }
 }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -13,9 +14,8 @@ namespace GOLProject
     public partial class Form1 : Form
     {
         // The universe array
-        public static int width = Properties.Settings.Default.Width;
-        public static int length = Properties.Settings.Default.Length;
-        public static bool[,] universe = new bool[length, width];
+        bool[,] universe;
+        bool[,] scratch;
         Universe verse;
         Cell cell;
         Random rand = new Random();
@@ -27,14 +27,16 @@ namespace GOLProject
         bool IsGridOn = Properties.Settings.Default.Grid;
         //To toggle shown neighbors on/off based on user settings
         bool IsShowOn = Properties.Settings.Default.Show;
-        //To toggle hud on/off based on user settings
-        bool hud = Properties.Settings.Default.HUD;
         //To toggle boundary on/off
-        bool boundary = Properties.Settings.Default.Boundary;
+        bool IsBoundOn = Properties.Settings.Default.Boundary;
         //To set speed based on user settings
         int speed = Properties.Settings.Default.Speed;
         //To set cell alive status based on user settings
         int initial = Properties.Settings.Default.InitialAlive;
+        //To set how wide the grid will be based on user settings
+        int width = Properties.Settings.Default.Width;
+        //To set how long the grid will be based on user settings
+        int length = Properties.Settings.Default.Length;
 
         // Drawing colors
         Color gridColor;
@@ -50,10 +52,12 @@ namespace GOLProject
         public Form1()
         {
             InitializeComponent();
+            universe = new bool[length, width];
             graphicsPanel1.BackColor = Properties.Settings.Default.BackGroundColor;
             cellColor = Properties.Settings.Default.CellColor;
             gridColor = Properties.Settings.Default.GridColor;
             CreateGame();
+            scratch = universe;
             // Setup the timer
             timer.Interval = speed; // milliseconds
             timer.Tick += Timer_Tick;
@@ -64,14 +68,22 @@ namespace GOLProject
         // Calculate the next generation of cells
         private void NextGeneration()
         {
-            CheckNeighbor();
+            if(IsBoundOn == false)
+            {
+                CheckNeighborFinite();
+            } 
+            else if(IsBoundOn == true)
+            {
+                CheckNeighborToroidal();
+            }
             Game();
             // Increment generation count
             generations++;
+            graphicsPanel1.Invalidate();
             alive = Universe.Cell.Count(i => i.isAlive);
             // Update status strip generations
             toolStripStatusLabelGenerations.Text = "Generations = " + generations.ToString();
-            toolStripStatusLabelAlive.Text = "Generation = " + alive.ToString();
+            toolStripStatusLabelAlive.Text = "Cells Alive = " + alive.ToString();
         }
 
         // The event called by the timer every Interval milliseconds.
@@ -93,6 +105,7 @@ namespace GOLProject
 
             // A Brush for filling living cells interiors (color)
             Brush cellBrush = new SolidBrush(cellColor);
+            Brush numBrush = new SolidBrush(Color.Black);
 
             // Iterate through the universe in the y, top to bottom
             for (int y = 0; y < universe.GetLength(1); y++)
@@ -113,13 +126,11 @@ namespace GOLProject
                     {
                         e.Graphics.FillRectangle(cellBrush, cellRect);
                     }
-
-                    
                     // Outline the cell with a pen
                     e.Graphics.DrawRectangle(gridPen, cellRect.X, cellRect.Y, cellRect.Width, cellRect.Height);
                 }
             }
-            
+
             // Cleaning up pens and brushes
             gridPen.Dispose();
             cellBrush.Dispose();
@@ -141,20 +152,22 @@ namespace GOLProject
                 int y = e.Y / cellHeight;
 
                 // Toggle the cell's state
-                universe[x, y] = !universe[x, y];
-                //editing state so that it matches what it going on
-                if(universe[x, y] == true)
+                cell.X = x;
+                cell.Y = y;
+                if (universe[cell.X, cell.Y] == false)
                 {
-                    cell.X = x;
-                    cell.Y = y;
                     cell.isAlive = true;
+                    scratch[cell.X, cell.Y] = true;
                 }
-                else if(universe[x, y] == false)
+                else if(universe[cell.X, cell.Y] == true)
                 {
-                    cell.X = x;
-                    cell.Y = y;
                     cell.isAlive = false;
+                    scratch[cell.X, cell.Y] = false;
                 }
+                bool[,] temp = universe;
+                universe = scratch;
+                temp = universe;
+                scratch = temp;
 
                 // Tell Windows you need to repaint
                 graphicsPanel1.Invalidate();
@@ -164,8 +177,9 @@ namespace GOLProject
         //Instance the main variables use and randomize the board
         public void CreateGame()
         {
-            verse = new Universe(universe.GetLength(0), universe.GetLength(1));
-
+            bool[,] newVerse = new bool[length, width];
+            verse = new Universe(newVerse.GetLength(0), newVerse.GetLength(1));
+            universe = newVerse;
             Universe.Cell.Clear();
 
             for(int y = 0; y < universe.GetLength(1); y++)
@@ -191,7 +205,8 @@ namespace GOLProject
         }
 
         //check the amount of neighbors each cell has
-        private void CheckNeighbor()
+        // only use if IsBoundOn = false
+        private void CheckNeighborFinite()
         {
             foreach(Cell cell in Universe.Cell)
             {
@@ -212,12 +227,20 @@ namespace GOLProject
                             continue;
                         }
                         //if xychecks are less the 0 then they do not exist on the board
-                        else if (xCheck < 0 || yCheck < 0)
+                        if (xCheck < 0)
+                        {
+                            continue;
+                        }
+                        if(yCheck < 0)
                         {
                             continue;
                         }
                         //if xychecks are greater then the length of the board they dont exist
-                        else if (xCheck > universe.GetLength(0) - 1 || yCheck > universe.GetLength(1) - 1)
+                        if (xCheck >= universe.GetLength(0) - 1)
+                        {
+                            continue;
+                        }
+                        if(yCheck >= universe.GetLength(1) - 1)
                         {
                             continue;
                         }
@@ -228,8 +251,56 @@ namespace GOLProject
                         }
                     }
                 }
+            }  
+        }
+
+        private void CheckNeighborToroidal()
+        {
+            foreach (Cell cell in Universe.Cell)
+            {
+                //initial coordinates created by each cell
+                int xcord = cell.X;
+                int ycord = cell.Y;
+
+                //since im only check the surrounding cells the difference from the original cell is 1
+                for (int xOff = -1; xOff <= 1; xOff++)
+                {
+                    for (int yOff = -1; yOff <= 1; yOff++)
+                    {
+                        int xCheck = xcord + xOff;
+                        int yCheck = ycord + yOff;
+                        //if both offsets equal  0
+                        if (xOff == 0 && yOff == 0)
+                        {
+                            continue;
+                        }
+                        //if xychecks are less the 0 then they do not exist on the board
+                        if(xCheck < 0)
+                        {
+                            xCheck = universe.GetLength(0) - 1;
+                        }
+                        if(yCheck < 0)
+                        {
+                            yCheck = universe.GetLength(1) - 1;
+                        }
+                        //if xychecks are greater then the length of the board they dont exist
+                        if(xCheck > universe.GetLength(0) -1)
+                        {
+                            xCheck = 0;
+                        }
+                        if( yCheck > universe.GetLength(1) - 1)
+                        {
+                            yCheck = 0;
+                        }
+                        //if universe is true then the cell is alive, increment numbers if true
+                        if (universe[xCheck, yCheck] == true)
+                        {
+                            cell.Neighbors++;
+                        }
+                    }
+                }
             }
-            
+
         }
 
         //the rules for the game
@@ -251,7 +322,7 @@ namespace GOLProject
                     }
                 }
                 //for cells that are dead
-                else if (cell.isAlive == false)
+                if(cell.isAlive == false)
                 {
                     //if neighbors is equal to 3 then next gen is alive
                     if (cell.Neighbors == 3)
@@ -260,24 +331,27 @@ namespace GOLProject
                     }
                 }
             }
-            
             //function for deteremining the next board
             foreach(Cell cell in Universe.Cell)
             {
+                bool[,] temp;
                 //if next equal true then isalive gets overrided and universe = true
                 if(cell.NextGenAlive == true)
                 {
                     cell.isAlive = cell.NextGenAlive;
-                    universe[cell.X, cell.Y] = true;
+                    scratch[cell.X, cell.Y] = true;
                     cell.Neighbors = 0;
                 }
                 //if false then cells stay dead or become dead
                 else if(cell.NextGenAlive == false)
                 {
                     cell.isAlive = cell.NextGenAlive;
-                    universe[cell.X, cell.Y] = false;
+                    scratch[cell.X, cell.Y] = false;
                     cell.Neighbors = 0;
                 }
+                universe = scratch;
+                temp = universe;
+                scratch = temp;
             }
             //needed to update the board allowing to show progression.
             graphicsPanel1.Invalidate();
@@ -322,12 +396,10 @@ namespace GOLProject
                     int life = rand.Next(100);
                     if (life < 0)
                     {
-                        cell.isAlive = true;
                         universe[x, y] = true;
                     }
                     else
                     {
-                        cell.isAlive = false;
                         universe[x, y] = false;
                     }
                     Universe.Cell.Add(cell);
@@ -358,7 +430,7 @@ namespace GOLProject
             }
         }
 
-        private void UpdateGrid_Click(object sender, EventArgs e)
+        private void UpdateGridColor_Click(object sender, EventArgs e)
         {
             IsGridOn = false;
             ColorDialog dlg = new ColorDialog();
@@ -384,7 +456,7 @@ namespace GOLProject
         }
 
 
-        private void UpdateGridColor_Click(object sender, EventArgs e)
+        private void UpdateGrid_Click(object sender, EventArgs e)
         {
             IsGridOn = !IsGridOn;
             if(IsGridOn == true)
@@ -408,7 +480,6 @@ namespace GOLProject
                 
                 speed = dlg.Number;
                 timer.Interval = speed;
-                graphicsPanel1.Invalidate();
             }
         }
 
@@ -426,6 +497,157 @@ namespace GOLProject
         {
             IsShowOn = !IsShowOn;
             graphicsPanel1.Invalidate();
+        }
+
+        private void UpdateSize_Click(object sender, EventArgs e)
+        {
+            SizeDialog dlg = new SizeDialog();
+
+            dlg.X = length;
+            dlg.Y = width;
+            if(DialogResult.OK == dlg.ShowDialog())
+            {
+                length = dlg.X;
+                width = dlg.Y;
+                graphicsPanel1.Invalidate();
+            }
+            CreateGame();
+        }
+        private void UpdateBoundary_Click(object sender, EventArgs e)
+        {
+            IsBoundOn = !IsBoundOn;
+        }
+
+        private void SaveGame()
+        {
+            SaveFileDialog dlg = new SaveFileDialog();
+            dlg.Filter = "All Files|*.*|Cells|*.cells";
+            dlg.FilterIndex = 2;
+            dlg.DefaultExt = "cells";
+            string currentRow = String.Empty;
+
+            if (DialogResult.OK == dlg.ShowDialog())
+            {
+                StreamWriter sw = new StreamWriter(dlg.FileName);
+                sw.WriteLine("!--Start Universe--");
+                for (int y = 0; y < universe.GetLength(1); y++)
+                {
+                    for (int x = 0; x < universe.GetLength(0); x++)
+                    {
+                        currentRow += (universe[x, y] == true) ? "O" : ".";
+                    }
+                    sw.WriteLine(currentRow);
+                    currentRow = string.Empty;
+                }
+                sw.WriteLine("!--End Universe");
+                sw.Flush();
+                sw.Close();
+            }
+        }
+
+        private void LoadGame()
+        {
+            OpenFileDialog dlg = new OpenFileDialog();
+            dlg.Filter = "All Files|*.*|Cells|*.cells";
+            dlg.FilterIndex = 2;
+            string line = string.Empty ;
+
+            if (DialogResult.OK == dlg.ShowDialog())
+            {
+                StreamReader sr = new StreamReader(dlg.FileName);
+                int maxWidth = 0;
+                int maxHeight = 0;
+
+                while(!sr.EndOfStream)
+                {
+                    string row = sr.ReadLine();
+                    if (row != null)
+                    {
+                        line = row.Substring(0, 1);
+                        if(line.Substring(0,1) == "!")
+                        {
+                            continue;
+                        }
+                        else if(line == "O" || line == "." )
+                        {
+                            maxWidth = row.Length;
+                            maxHeight++;
+                        }
+                    }
+                    line = String.Empty;
+                }
+
+                bool[,] newVerse = new bool[maxHeight, maxWidth];
+                verse = new Universe(newVerse.GetLength(0), newVerse.GetLength(1));
+                universe = newVerse;
+                Universe.Cell.Clear();
+
+                for (int y = 0; y < universe.GetLength(1); y++)
+                {
+                    for (int x = 0; x < universe.GetLength(0); x++)
+                    {
+                        cell = new Cell(x, y);
+                        //default is 15% but user has complete control over this feature
+                        
+                        Universe.Cell.Add(cell);
+                    }
+                }
+                sr.BaseStream.Seek(0, SeekOrigin.Begin);
+                int yPos = 0;
+                while (!sr.EndOfStream)
+                {
+                    string row = sr.ReadLine();
+                    if (row != null)
+                    {
+                        line = row.Substring(0, 1);
+                        if (line == "!")
+                        {
+                            continue;
+                        }
+                        else
+                        {
+                            for (int xPos = 0; xPos < row.Length; xPos++)
+                            {
+                                if (row[xPos] == 'O')
+                                {
+                                    scratch[xPos, yPos] = true;
+                                    cell.X = xPos;
+                                    cell.Y = yPos;
+                                    cell.isAlive = true;
+
+                                }
+                                else if (row[xPos] == '.')
+                                {
+                                    scratch[xPos, yPos] = false;
+                                    cell.X = xPos;
+                                    cell.Y = yPos;
+                                    cell.isAlive = false; ;
+                                }
+                            }
+                        }
+                    }
+                    yPos++;
+                }
+                universe = scratch;
+                graphicsPanel1.Invalidate();
+                sr.Close();
+            }
+        }
+
+        private void SaveGame_Click(object sender, EventArgs e)
+        {
+            SaveGame();
+        }
+
+        private void SaveAsGame_Click(object sender, EventArgs e)
+        {
+            SaveGame();
+        }
+
+        private void LoadGame_Click(object sender, EventArgs e)
+        {
+            ClearBoard_Click(sender, e);
+            LoadGame();
         }
     }
 

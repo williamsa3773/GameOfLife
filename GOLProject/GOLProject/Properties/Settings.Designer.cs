@@ -61,7 +61,7 @@ namespace GOLProject.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("1000")]
+        [global::System.Configuration.DefaultSettingValueAttribute("100")]
         public int Speed {
             get {
                 return ((int)(this["Speed"]));
