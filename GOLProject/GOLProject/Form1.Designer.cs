@@ -49,6 +49,7 @@
             this.cELLCOLORToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.gRIDCOLORToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.bACKCOLORToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.lifeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.showNeighborsToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.onOffToolStripMenuItem2 = new System.Windows.Forms.ToolStripMenuItem();
             this.sizeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -180,6 +181,7 @@
             this.viewToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.boundaryToolStripMenuItem,
             this.gridToolStripMenuItem1,
+            this.lifeToolStripMenuItem,
             this.showNeighborsToolStripMenuItem1,
             this.sizeToolStripMenuItem,
             this.speedToolStripMenuItem,
@@ -250,6 +252,13 @@
             this.bACKCOLORToolStripMenuItem.Text = "Background Color";
             this.bACKCOLORToolStripMenuItem.Click += new System.EventHandler(this.UpdateBackgroundColor_Click);
             // 
+            // lifeToolStripMenuItem
+            // 
+            this.lifeToolStripMenuItem.Name = "lifeToolStripMenuItem";
+            this.lifeToolStripMenuItem.Size = new System.Drawing.Size(161, 22);
+            this.lifeToolStripMenuItem.Text = "Life";
+            this.lifeToolStripMenuItem.Click += new System.EventHandler(this.UpdateLife_Click);
+            // 
             // showNeighborsToolStripMenuItem1
             // 
             this.showNeighborsToolStripMenuItem1.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
@@ -261,9 +270,7 @@
             // onOffToolStripMenuItem2
             // 
             this.onOffToolStripMenuItem2.Name = "onOffToolStripMenuItem2";
-            this.onOffToolStripMenuItem2.Size = new System.Drawing.Size(112, 22);
-            this.onOffToolStripMenuItem2.Text = "On/Off";
-            this.onOffToolStripMenuItem2.Click += new System.EventHandler(this.UpdateNeighbor_Click);
+            this.onOffToolStripMenuItem2.Size = new System.Drawing.Size(67, 22);
             // 
             // sizeToolStripMenuItem
             // 
@@ -518,6 +525,7 @@
             this.toolStripButton1.Name = "toolStripButton1";
             this.toolStripButton1.Size = new System.Drawing.Size(23, 22);
             this.toolStripButton1.Text = "toolStripButton1";
+            this.toolStripButton1.Click += new System.EventHandler(this.UpdateSettings_Click);
             // 
             // errorProvider1
             // 
@@ -615,6 +623,7 @@
         private System.Windows.Forms.ToolStripButton toolStripButton5;
         private System.Windows.Forms.ToolStripButton toolStripButton6;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
+        private System.Windows.Forms.ToolStripMenuItem lifeToolStripMenuItem;
     }
 }
 

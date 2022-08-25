@@ -25,8 +25,6 @@ namespace GOLProject
         //below are the settings bools
         //to toggle grid on/off based on user settings
         bool IsGridOn = Properties.Settings.Default.Grid;
-        //To toggle shown neighbors on/off based on user settings
-        bool IsShowOn = Properties.Settings.Default.Show;
         //To toggle boundary on/off
         bool IsBoundOn = Properties.Settings.Default.Boundary;
         //To set speed based on user settings
@@ -175,7 +173,7 @@ namespace GOLProject
         }
 
         //Instance the main variables use and randomize the board
-        public void CreateGame()
+        private void CreateGame()
         {
             bool[,] newVerse = new bool[length, width];
             verse = new Universe(newVerse.GetLength(0), newVerse.GetLength(1));
@@ -493,25 +491,17 @@ namespace GOLProject
 
         }
 
-        private void UpdateNeighbor_Click(object sender, EventArgs e)
-        {
-            IsShowOn = !IsShowOn;
-            graphicsPanel1.Invalidate();
-        }
-
         private void UpdateSize_Click(object sender, EventArgs e)
         {
             SizeDialog dlg = new SizeDialog();
 
-            dlg.X = length;
-            dlg.Y = width;
             if(DialogResult.OK == dlg.ShowDialog())
             {
                 length = dlg.X;
                 width = dlg.Y;
-                graphicsPanel1.Invalidate();
             }
             CreateGame();
+            graphicsPanel1.Invalidate();
         }
         private void UpdateBoundary_Click(object sender, EventArgs e)
         {
@@ -648,6 +638,36 @@ namespace GOLProject
         {
             ClearBoard_Click(sender, e);
             LoadGame();
+        }
+
+        private void UpdateLife_Click(object sender, EventArgs e)
+        {
+            LifeDialog dlg = new LifeDialog();
+
+            if (DialogResult.OK == dlg.ShowDialog())
+            {
+
+                initial = dlg.Life;
+            }
+        }
+
+        private void UpdateSettings_Click(object sender, EventArgs e)
+        {
+            SettingsDialog dlg = new SettingsDialog();
+
+            if(DialogResult.OK == dlg.ShowDialog())
+            {
+                
+                IsGridOn = dlg.Grid;
+                IsBoundOn = dlg.Boundary;
+                speed = dlg.Speed;
+                initial = dlg.Life;
+                length = dlg.X;
+                width = dlg.Y;
+            }
+            ClearBoard_Click(sender,e);
+            CreateGame();
+            graphicsPanel1.Invalidate();
         }
     }
 

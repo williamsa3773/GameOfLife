@@ -74,36 +74,12 @@ namespace GOLProject.Properties {
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("False")]
-        public bool HUD {
-            get {
-                return ((bool)(this["HUD"]));
-            }
-            set {
-                this["HUD"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("False")]
         public bool Grid {
             get {
                 return ((bool)(this["Grid"]));
             }
             set {
                 this["Grid"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("False")]
-        public bool Show {
-            get {
-                return ((bool)(this["Show"]));
-            }
-            set {
-                this["Show"] = value;
             }
         }
         
