@@ -55,7 +55,7 @@ namespace GOLProject
             cellColor = Properties.Settings.Default.CellColor;
             gridColor = Properties.Settings.Default.GridColor;
             CreateGame();
-            scratch = universe;
+            scratch = new bool[length, width];
             // Setup the timer
             timer.Interval = speed; // milliseconds
             timer.Tick += Timer_Tick;
@@ -175,9 +175,8 @@ namespace GOLProject
         //Instance the main variables use and randomize the board
         private void CreateGame()
         {
-            bool[,] newVerse = new bool[length, width];
-            verse = new Universe(newVerse.GetLength(0), newVerse.GetLength(1));
-            universe = newVerse;
+            universe = new bool[length, width];
+            scratch = new bool[length, width];
             Universe.Cell.Clear();
 
             for(int y = 0; y < universe.GetLength(1); y++)
@@ -185,18 +184,22 @@ namespace GOLProject
                 for(int x = 0; x < universe.GetLength(0); x++)
                 {
                     cell = new Cell(x,y);
+                    bool[,] temp = universe;
                     int life = rand.Next(100);
                     //default is 15% but user has complete control over this feature
                     if (life < initial)
                     {
                         cell.isAlive = true; 
-                        universe[x, y] = true;
+                        scratch[x, y] = true;
                     }
                     else
                     {
                         cell.isAlive = false;
-                        universe[x, y] = false;
+                        scratch[x, y] = false;
                     }
+                    universe = scratch;
+                    temp = universe;
+                    scratch = temp;
                     Universe.Cell.Add(cell);
                 }
             }
@@ -358,16 +361,7 @@ namespace GOLProject
         //pause/play
         private void UpdatePaused_Click(object sender, EventArgs e)
         {
-            if(IsPaused == false)
-            {
-                timer.Enabled = true;
-                NextGeneration();
-                IsPaused = true;
-            } else if(IsPaused == true)
-            {
-                timer.Enabled = false;
-                IsPaused = false;
-            }
+            
         }
 
         //re randomize list and update the board
@@ -394,12 +388,13 @@ namespace GOLProject
                     int life = rand.Next(100);
                     if (life < 0)
                     {
-                        universe[x, y] = true;
+                        scratch[x, y] = true;
                     }
                     else
                     {
-                        universe[x, y] = false;
+                        scratch[x, y] = false;
                     }
+                    universe = scratch;
                     Universe.Cell.Add(cell);
                 }
             }
@@ -484,11 +479,7 @@ namespace GOLProject
         private void exitToolStripMenuItem_Click(object sender, EventArgs e)
         {
             this.Close();
-        }
-
-        private void Form1_Load(object sender, EventArgs e)
-        {
-
+            Properties.Settings.Default.Save();
         }
 
         private void UpdateSize_Click(object sender, EventArgs e)
@@ -567,9 +558,8 @@ namespace GOLProject
                     line = String.Empty;
                 }
 
-                bool[,] newVerse = new bool[maxHeight, maxWidth];
-                verse = new Universe(newVerse.GetLength(0), newVerse.GetLength(1));
-                universe = newVerse;
+                universe = new bool[maxHeight, maxWidth];
+                scratch = new bool[maxHeight, maxWidth];
                 Universe.Cell.Clear();
 
                 for (int y = 0; y < universe.GetLength(1); y++)
@@ -577,8 +567,6 @@ namespace GOLProject
                     for (int x = 0; x < universe.GetLength(0); x++)
                     {
                         cell = new Cell(x, y);
-                        //default is 15% but user has complete control over this feature
-                        
                         Universe.Cell.Add(cell);
                     }
                 }
@@ -618,7 +606,10 @@ namespace GOLProject
                     }
                     yPos++;
                 }
+                bool[,] temp = universe;
                 universe = scratch;
+                temp = universe;
+                scratch = temp;
                 graphicsPanel1.Invalidate();
                 sr.Close();
             }
@@ -644,6 +635,7 @@ namespace GOLProject
         {
             LifeDialog dlg = new LifeDialog();
 
+            initial = Properties.Settings.Default.InitialAlive;
             if (DialogResult.OK == dlg.ShowDialog())
             {
 
@@ -654,6 +646,13 @@ namespace GOLProject
         private void UpdateSettings_Click(object sender, EventArgs e)
         {
             SettingsDialog dlg = new SettingsDialog();
+
+            IsGridOn = Properties.Settings.Default.Grid;
+            IsBoundOn = Properties.Settings.Default.Boundary;
+            speed = Properties.Settings.Default.Speed;
+            initial = Properties.Settings.Default.InitialAlive;
+            length = Properties.Settings.Default.Length;
+            width = Properties.Settings.Default.Width;
 
             if(DialogResult.OK == dlg.ShowDialog())
             {
@@ -666,6 +665,35 @@ namespace GOLProject
                 width = dlg.Y;
             }
             ClearBoard_Click(sender,e);
+            CreateGame();
+            graphicsPanel1.Invalidate();
+        }
+
+        private void ReloadSettings_Click(object sender, EventArgs e)
+        {
+            Properties.Settings.Default.Reload();
+        }
+
+        private void ResetSettings_Click(object sender, EventArgs e)
+        {
+            Properties.Settings.Default.Reset();
+        }
+
+        private void PlayGame_Click(object sender, EventArgs e)
+        {
+            IsPaused = false; ;
+            timer.Enabled = true;
+            NextGeneration();
+        }
+
+        private void PauseGame_Click(object sender, EventArgs e)
+        {
+            IsPaused = true;
+            timer.Enabled = false;
+        }
+
+        private void NewGame_Click(object sender, EventArgs e)
+        {
             CreateGame();
             graphicsPanel1.Invalidate();
         }
