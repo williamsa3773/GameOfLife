@@ -1,0 +1,21 @@
+@page "/GOL"
+@rendermode InteractiveServer
+
+<PageTitle>Game of Life</PageTitle>
+
+<h1>Conway's Game of Life</h1>
+
+<p role="status">Current Grid Size: @gridSize</p>
+
+<button @onclick="() => SetGridSize(10)">10x10</button>
+<button @onclick="() => SetGridSize(20)">20x20</button>
+<button @onclick="() => SetGridSize(30)">30x30</button>
+
+@code {
+	private int gridSize = 10;
+
+	private void SetGridSize(int size)
+	{
+		gridSize = size;
+	}
+}
